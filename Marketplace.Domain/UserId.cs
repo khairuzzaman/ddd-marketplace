@@ -1,17 +1,14 @@
-﻿using System;
+﻿using Marketplace.Framework;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Marketplace.Domain
 {
-    public class UserId
+    public class UserId : Value<UserId>
     {
         private readonly Guid _value;
 
-        public UserId(Guid value)
-        {
-            if (value == default) throw new ArgumentException(nameof(value), "User id cannot be empty");
-            _value = value;
-        }
+        public UserId(Guid value) => _value = value;
     }
 }
