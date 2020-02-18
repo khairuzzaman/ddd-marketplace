@@ -18,9 +18,12 @@ namespace Marketplace.Domain
             var currency = currencyLookup.FindCurrency(currencyCode);
             if (!currency.InUse) throw new ArgumentException($"Currency {currencyCode} is not valid");
 
-            if (decimal.Round(amount, currency.DecimalPlaces) != amount) throw new ArgumentOutOfRangeException(nameof(amount), "Amount cannot have more than two decimals");
+            if (decimal.Round(amount, currency.DecimalPlaces) != amount) 
+            { 
+                throw new ArgumentOutOfRangeException(nameof(amount), $"Amount in {currencyCode} cannot have more than {currency.DecimalPlaces} decimals"); 
+            }
             Amount = amount;
-            CurrencyCode = currencyCode;
+            Currency = currency;
         }
 
         private Money(decimal amount, CurrencyDetails currency)
@@ -35,18 +38,22 @@ namespace Marketplace.Domain
 
         public Money Add(Money summand) 
         {
-            if (CurrencyCode != summand.CurrencyCode) throw new CurrencyMismatchException("Cannot sum amounts with different currencies");
+            if (Currency != summand.Currency) throw new CurrencyMismatchException("Cannot sum amounts with different currencies");
             
             return new Money(Amount + summand.Amount, Currency);
         }
         public Money Subtract(Money subtrahend) 
         {
-            if (CurrencyCode != subtrahend.CurrencyCode) throw new CurrencyMismatchException("Cannot subtract amounts with different currencies");
+            if (Currency != subtrahend.Currency) throw new CurrencyMismatchException("Cannot subtract amounts with different currencies");
             return new Money(Amount - subtrahend.Amount, Currency);
         } 
 
         public static Money operator +(Money summand1, Money summand2) => summand1.Add(summand2);
         public static Money operator -(Money minued, Money subtrahend) => minued.Subtract(subtrahend);
+        public override string ToString()
+        {
+            return $"{Currency.CurrencyCode} {Amount}";
+        }
     }
 
     public class CurrencyMismatchException : Exception
