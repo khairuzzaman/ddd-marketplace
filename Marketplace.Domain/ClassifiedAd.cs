@@ -10,19 +10,69 @@ namespace Marketplace.Domain
 
         public ClassifiedAd(ClassifiedAdId id, UserId ownerId)
         {
-            if(id == default) throw new ArgumentException("Identity must be specified", nameof(id));
-
             Id = id;
-            _ownerId = ownerId;
+            OwnerId = ownerId;
+            State = ClassifiedAdState.Inactive;
+            EnsureValidState();
         }
 
-        public void SetTitle(string title) => _title = title;
-        public void UpdateText(string text) => _text = text;
-        public void UpdatePrice(decimal price) => _price = price;
+        public void SetTitle(ClassifiedAddTitle title) 
+        {
+            Title = title;
+            EnsureValidState();
+        }
+        public void UpdateText(ClassifiedAdText text) 
+        {
+            Text = text;
+            EnsureValidState();
+        }
+        public void UpdatePrice(Price price)
+        {
+            Price = price;
+            EnsureValidState();
+        }
 
-        private UserId _ownerId;
-        private string _title;
-        private string _text;
-        private decimal _price;
+        public void RequestToPublish()
+        {
+            State = ClassifiedAdState.PendingReview;
+            EnsureValidState();
+        }
+
+        protected void EnsureValidState()
+        {
+            var valid =
+                Id != null &&
+                OwnerId != null &&
+                (State switch
+                {
+                    ClassifiedAdState.PendingReview =>
+                        Title != null &&
+                        Text != null &&
+                        Price?.Amount > 0,
+                    ClassifiedAdState.Active =>
+                        Title != null &&
+                        Text != null &&
+                        Price?.Amount > 0 &&
+                        ApprovedBy != null,
+                    _ => true
+                });
+            if (!valid)
+                throw new InvalidEntityStateException(this, $"Post-checks failed in state {State}");
+        }
+
+        public UserId OwnerId { get; }
+        public ClassifiedAddTitle Title { get; private set; }
+        public ClassifiedAdText Text { get; private set; }
+        public Price Price { get; set; }
+        public ClassifiedAdState State { get; private set; }
+        public UserId ApprovedBy { get; private set; }
+
+        public enum ClassifiedAdState
+        {
+            PendingReview,
+            Active,
+            Inactive,
+            MarkedAsSold
+        }
     }
 }
