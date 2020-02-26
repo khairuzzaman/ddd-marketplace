@@ -7,14 +7,11 @@ namespace Marketplace.Domain
 {
     public class ClassifiedAdText : Value<ClassifiedAdText>
     {
+        public string Value { get; }
+
+        internal ClassifiedAdText(string text) => Value = text;
         public static ClassifiedAdText FromString(string text) => new ClassifiedAdText(text);
 
-        private readonly string _value;
-        private ClassifiedAdText(string value)
-        {
-            _value = value;
-        }
-
-        public static implicit operator string(ClassifiedAdText text) => text._value;
+        public static implicit operator string(ClassifiedAdText text) => text.Value;
     }
 }
