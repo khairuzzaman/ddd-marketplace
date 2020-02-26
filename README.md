@@ -10,3 +10,4 @@ Benefit of value objects
 5. Enable type safety
 
 ## Entity invariants
+we need to ensure that a given combination of parameters, current entity state, and execute behavior, is not going to bring the entity to some invalid state.
